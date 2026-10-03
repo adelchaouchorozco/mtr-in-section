@@ -58,6 +58,16 @@ const cut = document.querySelector('[data-cut]');
 if (cut) initCut(cut);
 
 // ---- lazy sections ----
+// Fetch every section's code now, so each one is ready before the reader
+// reaches it even on a slow connection. Running it still waits for the observer.
+['film.js', 'film-kit.js', 'film-scenes.js', 'scenes-early.js', 'scenes-late.js', 'data.js', 'layout.js',
+  'stations-data.js', 'network.js', 'net3d.js', 'stacks.js', 'methods.js', 'sources.js'].forEach((f) => {
+  const link = document.createElement('link');
+  link.rel = 'modulepreload';
+  link.href = new URL(`./${f}`, import.meta.url).href;
+  document.head.append(link);
+});
+
 let filmApi = null;
 const lazy = [
   ['[data-film]', () => import('./film.js').then((m) => { filmApi = m.initFilm(document.querySelector('[data-film]')); return filmApi; })],
@@ -85,7 +95,7 @@ if ('IntersectionObserver' in window) {
       if (item) boot(...item);
       io.unobserve(en.target);
     }
-  }, { rootMargin: '600px 0px' });
+  }, { rootMargin: '1200px 0px' });
   lazy.forEach(([sel]) => { const n = document.querySelector(sel); if (n) io.observe(n); });
 }
 // backstop: start everything after the page settles, and when a hash is followed
